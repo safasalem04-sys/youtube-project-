@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcription YouTube</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="page-shell">
+        <div class="glow glow-left"></div>
+        <div class="glow glow-right"></div>
+
+        <main class="panel">
+            <section class="hero">
+                <p class="eyebrow">Application Python + HTML</p>
+                <h1>Extraire la transcription d'une video YouTube en quelques secondes.</h1>
+                <p class="lead">
+                    Collez un lien YouTube, lancez la recuperation et obtenez la transcription
+                    directement a l'ecran, puis dans un fichier texte telechargeable.
+                </p>
+            </section>
+
+            <section class="workspace-card">
+                <form method="post" class="transcript-form">
+                    <label for="youtube_url">Lien de la video YouTube</label>
+                    <div class="input-row">
+                        <input
+                            id="youtube_url"
+                            name="youtube_url"
+                            type="text"
+                            placeholder="https://www.youtube.com/watch?v=..."
+                            value="{{ submitted_url }}"
+                            required
+                        >
+                        <button type="submit">Transcrire</button>
+                    </div>
+                </form>
+
+                <div class="status-grid">
+                    <article>
+                        <span>Resultat</span>
+                        <strong>{{ 'Pret' if transcript_text else ('Erreur' if error_message else 'En attente') }}</strong>
+                    </article>
+                    <article>
+                        <span>Langue detectee</span>
+                        <strong>{{ detected_language if detected_language else 'Non disponible' }}</strong>
+                    </article>
+                    <article>
+                        <span>Export texte</span>
+                        <strong>{{ saved_file if saved_file else 'Pas encore genere' }}</strong>
+                    </article>
+                </div>
+
+                {% if error_message %}
+                    <div class="message error">{{ error_message }}</div>
+                {% endif %}
+
+                {% if transcript_text %}
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div>
+                                <p class="result-kicker">Transcription disponible</p>
+                                <h2>Texte extrait</h2>
+                            </div>
+                            {% if saved_file %}
+                                <a class="download-link" href="{{ url_for('download_transcript', file_name=saved_file) }}">
+                                    Telecharger le fichier .txt
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        {% if transcript_stats %}
+                            <div class="stats-grid">
+                                <article>
+                                    <span>Video ID</span>
+                                    <strong>{{ transcript_stats.video_id }}</strong>
+                                </article>
+                                <article>
+                                    <span>Mots</span>
+                                    <strong>{{ transcript_stats.word_count }}</strong>
+                                </article>
+                                <article>
+                                    <span>Lignes</span>
+                                    <strong>{{ transcript_stats.line_count }}</strong>
+                                </article>
+                                <article>
+                                    <span>Caracteres</span>
+                                    <strong>{{ transcript_stats.character_count }}</strong>
+                                </article>
+                            </div>
+                        {% endif %}
+
+                        <textarea readonly>{{ transcript_text }}</textarea>
+                    </div>
+                {% endif %}
+
+                {% if recent_transcriptions %}
+                    <section class="history-card">
+                        <div class="history-header">
+                            <div>
+                                <p class="result-kicker">Historique local</p>
+                                <h2>Derniers fichiers generes</h2>
+                            </div>
+                        </div>
+
+                        <div class="history-list">
+                            {% for item in recent_transcriptions %}
+                                <article class="history-item">
+                                    <div>
+                                        <strong>{{ item.file_name }}</strong>
+                                        <p>{{ item.modified_at }} · {{ item.size }}</p>
+                                    </div>
+                                    <a class="history-link" href="{{ url_for('download_transcript', file_name=item.file_name) }}">
+                                        Telecharger
+                                    </a>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    </section>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+</body>
+</html>
